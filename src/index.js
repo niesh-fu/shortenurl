@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyPaser = require('body-parser');
+// const bodyPaser = require('body-parser');
 // const route = require('./route/route.js');
 // const routes= require('./route/redirect.js');
 const { default : mongoose } = require('mongoose');
@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended : true }));
 mongoose.connect("mongodb+srv://disha123:hl6LMcJIED1eCZhr@cluster0.hrerz.mongodb.net/group66Database", {
     useNewUrlParser: true
 })
-.then( () => console.log("MongoDb is connected"))   // it passes the function when the promises gets resolved
+.then( () => console.log("MongoDb is connected..."))            // it passes the function when the promises gets resolved
 .catch ( err => console.log(err) )
 // app.use('/', routes);
 // app.use('/', route );
