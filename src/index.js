@@ -1,7 +1,5 @@
 const express = require('express');
-// const bodyPaser = require('body-parser');
-// const route = require('./route/route.js');
-// const routes= require('./route/redirect.js');
+const route = require('./route/route.js');
 const { default : mongoose } = require('mongoose');
 const bodyParser = require('body-parser');
 const app = express();
@@ -14,10 +12,9 @@ mongoose.connect("mongodb+srv://disha123:hl6LMcJIED1eCZhr@cluster0.hrerz.mongodb
 })
 .then( () => console.log("MongoDb is connected..."))            // it passes the function when the promises gets resolved
 .catch ( err => console.log(err) )
-// app.use('/', routes);
-// app.use('/', route );
-app.use('/', require('./route/redirect.js'))
-app.use('/', require('./route/route.js'))
+app.use('/', route );
+// app.use('/', require('./route/redirect.js'))
+// app.use('/', require('./route/route.js'))
 
 
 app.listen(process.env.PORT || 3000, function () {
