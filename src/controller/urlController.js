@@ -1,3 +1,6 @@
+const redis = require("redis");
+const { promisify } = require("util");
+
 const Url = require("../model/urlModel.js")
 const validUrl = require('valid-url')
 const shortid = require('shortid')
@@ -11,10 +14,6 @@ const isValid = value => {
 }
 
 
-
-const redis = require("redis");
-
-const { promisify } = require("util");
 
 //Connect to redis
 const redisClient = redis.createClient(
@@ -50,37 +49,38 @@ const urlShort = async (req, res) => {
     const {  longUrl} = req.body                       // destructure the longUrl from req.body.longUrl , (URL = uniform resource locator),(URI = uniform resource identifier), check base url if valid using the validUrl.isUri method
     
     if(!Object.keys(req.body).length > 0 || !isValid(longUrl))
-    return res.status(400).send({status: false, message: "Please enter the URL."}) 
+        return res.status(400).send({status: false, message: "Please enter the URL."}) 
 
     if (!validUrl.isUri(baseUrl)) {
-      return res.status(401).json('Invalid base URL')
+        return res.status(401).json('Invalid base URL')    // check- not authorized
   }
 
-  if(!validUrl.isUri(longUrl.trim()))
-  return res.status(400).send({status: false, message: "Enter a Valid URL."}) 
+    if(!validUrl.isUri(longUrl.trim()))
+        return res.status(400).send({status: false, message: "Enter a Valid URL."}) 
 
-  let checkRedis = await GET_ASYNC(`${longUrl}`) 
-  if( checkRedis)
-      return res.status(200).send({status:true,message:"Data from Redis", redisdata:JSON.parse(checkRedis)})
+    let checkRedis = await GET_ASYNC(`${longUrl}`) 
+    if( checkRedis)
+        return res.status(200).send({status:true,message:"Data from Redis", redisdata:JSON.parse(checkRedis)})
 
 
-      let checkDB = await Url.findOne({longUrl: longUrl}).select({_id:0, createdAt:0, updatedAt: 0, __v:0})
-      if(checkDB){
-          await SET_ASYNC(`${longUrl}`,JSON.stringify(checkDB));
-          return res.status(200).send({status: true, message: "Data from DB and it sets this data in Redis ", data: checkDB})
+    let checkDB = await Url.findOne({longUrl: longUrl}).select({_id:0, createdAt:0, updatedAt: 0, __v:0})
+    if(checkDB){
+        await SET_ASYNC(`${longUrl}`,JSON.stringify(checkDB));
+        return res.status(200).send({status: true, message: "Data from DB and it sets this data in Redis ", data: checkDB})
         }
+
             const urlCode = shortid.generate().toLowerCase()
             const shortUrl = baseUrl+ '/' + urlCode
             req.body.shortUrl = shortUrl;
             req.body.urlCode = urlCode;
             let generateUrl = await Url.create(req.body)
+          
             let Data = {
               urlCode : generateUrl.urlCode,
               longUrl  : generateUrl.longUrl,
               shortUrl : generateUrl.shortUrl
             }
-            res.status(200).json({status : true, message : "This is generated url",data: Data})//.select({_id:0, createdAt:0, updatedAt: 0, __v:0})
-        
+            res.status(200).json({status : true, message : "This is generated url from DB",data: Data})//.select({_id:0, createdAt:0, updatedAt: 0, __v:0})
     }
       catch(err){
           console.log(err)
@@ -106,7 +106,7 @@ const getUrlRedis = async function (req, res) {
           return  res.status(404).send({ status: false, message: "Urlcode Not Found" });
         }
         await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(short))
-        res.status(302).redirect(short.longUrl)      // status(302).redirect
+        res.status(302).redirect(short.longUrl)                  // status(302).redirect
       } 
    }  
     catch (err){
