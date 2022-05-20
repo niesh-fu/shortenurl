@@ -80,7 +80,7 @@ const urlShort = async (req, res) => {
               longUrl  : generateUrl.longUrl,
               shortUrl : generateUrl.shortUrl
             }
-            res.status(200).json({status : true, message : "This is generated url from DB",data: Data})//.select({_id:0, createdAt:0, updatedAt: 0, __v:0})
+            res.status(201).json({status : true, message : "This is generated url from DB",data: Data})//.select({_id:0, createdAt:0, updatedAt: 0, __v:0})
     }
       catch(err){
           console.log(err)
